@@ -14,7 +14,7 @@ export default function Contact() {
           <div className="ml-4">
             <div className="my-2">
               Ashok Sharma - Services <br />
-              <Link className="text-teal-600 hover:text-teal-500 transition-all font-medium" to="tel:+917361092810">
+              <Link className="text-teal-600 hover:text-teal-500 transition-all font-medium" to="tel:+919570322597">
                 9570322597
               </Link>
             </div>

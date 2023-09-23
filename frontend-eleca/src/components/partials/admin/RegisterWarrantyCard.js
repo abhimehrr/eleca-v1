@@ -1,4 +1,8 @@
 import React, { useEffect, useContext, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+// Loader 
+import Loader from '../tiny/LoaderSm'
 
 // Admin Context
 import AdminContext from '../../../context/AdminContext'
@@ -7,12 +11,15 @@ import UserContext from '../../../context/UserContext'
 export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, showInvalidCard, showRegCard }) {
     const { Host, AuthToken, Authorize } = useContext(AdminContext)
     const UserContextData = useContext(UserContext)
+
+    const Route = useNavigate()
     
     const [imgSrc, setImgSrc] = useState('')
     const [imgTitle, setImgTitle] = useState('')
     const [imgFile, setImgFile] = useState(null)
 
     const [errMsg, setErrMsg] = useState('')
+    const [loader, setLoader] = useState(false)
 
     const itemNameRef = useRef(null)
     const cNameRef = useRef(null)
@@ -52,18 +59,6 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
                 setImgFile(newFile)
 
                 setImgTitle(newFile.name)
-
-                // console.log('New File : ', newFile)
-
-                // var formData = new FormData()
-                // formData.append('file', newFile)
-                
-                // fetch('/upload', {
-                //     method: 'POST',
-                //     body: formData
-                // }).then(r => r.text()).then(d => {
-                //     console.log(d)
-                // })
             }
         }
     }
@@ -120,7 +115,7 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
         if(cMobile.length < 1) {
             cMobileRef.current.classList.add('border-red-500')
             setErrMsg('Please enter mobile number')
-        } else if(cMobile.length > 10 || cMobile.length < 10 && cMobile.length > 1) {
+        } else if((cMobile.length > 10 || cMobile.length < 10) && cMobile.length > 1) {
             cMobileRef.current.classList.add('border-red-500')
             setErrMsg('Mobile number must be 10 character')
         } else if(itemName.length < 1) {
@@ -156,7 +151,8 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
             period > 0 && 
             imgFile
         ) {
-            
+            setLoader(true)
+
             // Register Warranty Card
             fetch(Host + 'register-warranty-card', {
                 method: 'POST',
@@ -191,6 +187,7 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
                             id: data.data.insertId, itemName,
                             cName, cMobile, cAddress, period
                         })
+                        setLoader(false)
                         showRegCard(false)
                         showInvalidCard(false)
                         showWarrantyCard(false)
@@ -207,13 +204,14 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
                 }
             }).catch(err => console.log('Error (Register Warranty) : ', err))
         }
-
-
     }
 
 
     useEffect(() => {
-        Authorize()
+        var auth = Authorize()
+        if(!auth) {
+            Route('/login')
+        }
     }, [])
 
     return (
@@ -260,10 +258,16 @@ export default function RegisterWarrantyCard({ setThankYou, showWarrantyCard, sh
                     Add Image
                     <input onChange={changeFile} type='file' id='files' accept='image/png, image/jpeg, image/jpg' className='hidden'/>
                 </label>
-                <button onClick={submitStatus} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                    <i className='fa-solid fa-check mr-2'></i>
-                    Submit
-                </button>
+                {loader ?
+                    <button className='w-full flex items-center justify-center px-4 py-2 rounded transition-all'>
+                        <Loader/>
+                    </button>
+                    :
+                    <button onClick={submitStatus} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                        <i className='fa-solid fa-check-double mr-2'></i>
+                        Submit
+                    </button>
+                }
             </div>
 
             {/* Image */}

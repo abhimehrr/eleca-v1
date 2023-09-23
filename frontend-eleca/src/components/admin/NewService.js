@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Components
 import Header from '../partials/admin/AdminHeader'
@@ -6,18 +7,26 @@ import AdminSecondaryHeader from '../partials/admin/AdminSecondaryHeader'
 import Footer from '../partials/Footer'
 
 import BackToTop from '../partials/BackToTop'
+import Loader from '../partials/tiny/LoaderSm'
 
 // Admin Context
 import AdminContext from '../../context/AdminContext'
 import UserContext from '../../context/UserContext'
 
 export default function NewService() {
-    const { Host } = useContext(AdminContext)
+    const { Host, AuthToken, Authorize } = useContext(AdminContext)
     const UserContextData = useContext(UserContext)
+
+    const Route = useNavigate()
+
+    // Loaders
+    const [checkLoader, setCheckLoader] = useState(false)
+    const [submitLoader, setSubmitLoader] = useState(false)
     
     // Option
     const [fanOpt, setFanOpt] = useState(false)
     const [errMsg, setErrMsg] = useState('')
+    const [showMsg, setShowMsg] = useState('Check If customer already exists')
     
     // Image States
     const [imgSrc, setImgSrc] = useState('')
@@ -126,6 +135,7 @@ export default function NewService() {
             itemNameRef.current.value.length > 1 &&
            imgFile
         ) {
+            setSubmitLoader(true)
             setErrMsg('')
 
             // Register Service
@@ -133,7 +143,7 @@ export default function NewService() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    authtoken: authToken
+                    authtoken: AuthToken
                 },
                 body: JSON.stringify({
                     name: cNameRef.current.value,
@@ -154,7 +164,7 @@ export default function NewService() {
                 fetch(Host + 'upload', {
                     method: 'POST',
                     headers: {
-                        authtoken: authToken
+                        authtoken: AuthToken
                     },
                     body: formData
                 })
@@ -171,6 +181,7 @@ export default function NewService() {
                     setItemType('')
                     setImgSrc('')
                     setImgFile(null)
+                    setSubmitLoader(false)
                 }).catch(err => {
                     console.log('Error (New Service): ', err)
                 })
@@ -219,26 +230,33 @@ export default function NewService() {
 
     // Check Customer Exists
     const checkCustomer = () => {
-        if(errMsg.length > 1) return
+        if(mobileRef.current.value.length === 10) {
+            setCheckLoader(true)
 
-        fetch(UserContextData.Host + 'search-customer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ mobile : mobileRef.current.value})
-        })
-        .then(res => res.json())
-        .then(data => {
-            var d = data.data
-            if(d) {
-                cNameRef.current.value = d.name
-                cAddressRef.current.value = d.address
-            } else {
-                cNameRef.current.value = ''
-                cAddressRef.current.value = ''
-            }
-        })
+            fetch(UserContextData.Host + 'search-customer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mobile : mobileRef.current.value})
+            })
+            .then(res => res.json())
+            .then(data => {
+                var d = data.data
+                if(d) {
+                    cNameRef.current.value = d.name
+                    cAddressRef.current.value = d.address
+                    setShowMsg('Customer found...')
+                } else {
+                    cNameRef.current.value = ''
+                    cAddressRef.current.value = ''
+                    setShowMsg('Customer not found...')
+                }
+                setCheckLoader(false)
+            })
+        }
+        
+
     }
 
 
@@ -255,19 +273,12 @@ export default function NewService() {
             mobileRef.current.classList.remove('border-red-500')
         }
     }
-
-    // Auth Token
-    const [authToken, setAuthToken] = useState('')
-    
+ 
+    // Auth
     useEffect(() => {
-        var authToken = document.cookie
-
-        if(!authToken) {
-            window.location.href = '/login'
-        } else {
-            authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-            authToken = authToken.toString().split('=')[1]
-            setAuthToken(authToken)
+        var auth = Authorize()
+        if(!auth) {
+            Route('/login')
         }
     }, [])
 
@@ -296,13 +307,19 @@ export default function NewService() {
                     <div className="my-4 w-full flex items-center gap-x-3">
                         {/* <label className="mr-3 font-medium" htmlFor='mobile'>Mobile</label> */}
                         <input type="number" onKeyDown={e => e.key === 'Enter' ? checkBtnRef.current.click() : false} onBlur={e => {validMobile(e.target.value);checkBtnRef.current.click()}} ref={mobileRef} placeholder='Mobile Number' id='mobile' className="w-3/5 px-2 py-1 text-sm bg-transparent border border-gray-200 text-gray-200 outline-none focus:border-teal-500 rounded transition-all"/>
-                        <button ref={checkBtnRef} onClick={checkCustomer} className='w-1/2 flex items-center justify-center font-medium bg-teal-600 py-1 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                            <i className='fa-solid fa-check-double mr-2 text-sm'></i>
-                            Check
-                        </button>
+                        {checkLoader ?
+                            <button className='w-1/2 flex items-center justify-center py-1 font-medium rounded transition-all'>
+                                <Loader/>
+                            </button>
+                        :
+                            <button ref={checkBtnRef} onClick={checkCustomer} className='w-1/2 flex items-center justify-center font-medium bg-teal-600 py-1 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                                <i className='fa-solid fa-check mr-2 text-sm'></i>
+                                Check
+                            </button>
+                        }
                     </div>
                     <div className="leading-7 -mt-2 text-sm text-gray-400">
-                        Check If customer already exists
+                        {showMsg}
                     </div>
 
                     <div className='flex items-center flex-wrap gap-3 mt-5'>
@@ -449,9 +466,16 @@ export default function NewService() {
                             Add Image
                             <input type='file' onChange={changeFile} id='files' accept='image/png, image/jpeg, image/jpg' className='hidden'/>
                         </label>
-                        <button onClick={submitStatus} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                            Submit
-                        </button>
+                        {submitLoader ?
+                            <button className='w-full flex items-center justify-center px-4 py-2 rounded transition-all'>
+                                <Loader/>
+                            </button>
+                            :
+                            <button onClick={submitStatus} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                                <i className='fa-solid fa-check-double mr-2'></i>
+                                Submit
+                            </button>
+                        }
                     </div>
 
                     {/* Image */}

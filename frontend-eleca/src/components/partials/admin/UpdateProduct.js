@@ -1,12 +1,19 @@
 import React, { useContext, useRef, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Admin Context
 import AdminContext from '../../../context/AdminContext'
 
+// Loader
+import Loader from '../tiny/LoaderSm'
+
 export default function UpdateProduct({ productId, setShowUpdateProduct }) {
-    const { Host, AuthToken, Authorize, priceList, setPriceList } = useContext(AdminContext)
+    const { Host, AuthToken, Authorize, priceList } = useContext(AdminContext)
+
+    const Route = useNavigate()
 
     const [errMsg, setErrMsg] = useState('')
+    const [loader, setLoader] = useState(false)
 
     // Ref
     const productRef = useRef(null)
@@ -46,6 +53,8 @@ export default function UpdateProduct({ productId, setShowUpdateProduct }) {
         }
 
         if(product.length > 1 && mrp > 1 && rlp > 1) {
+            setLoader(true)
+
             fetch(Host + 'update-product', {
                 method: 'POST',
                 headers: {
@@ -66,7 +75,10 @@ export default function UpdateProduct({ productId, setShowUpdateProduct }) {
 
 
     useEffect(() => {
-        Authorize()
+        var auth = Authorize()
+        if(!auth) {
+            Route('/login')
+        }
 
         var filter = priceList.filter(product => product.ID === productId)
         productRef.current.value = filter[0].product
@@ -105,10 +117,16 @@ export default function UpdateProduct({ productId, setShowUpdateProduct }) {
                     <i className='fa-solid fa-xmark mr-2'></i>
                     Cancel
                 </button>
-                <button onClick={updateProduct} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                    <i className='fa-solid fa-check mr-2'></i>
-                    Submit
-                </button>
+                {loader ?
+                    <button className='w-full flex items-center justify-center px-4 py-2 rounded transition-all'>
+                        <Loader/>
+                    </button>
+                    :
+                    <button onClick={updateProduct} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                        <i className='fa-solid fa-check-double mr-2'></i>
+                        Submit
+                    </button>
+                }
             </div>
         </div>
     )

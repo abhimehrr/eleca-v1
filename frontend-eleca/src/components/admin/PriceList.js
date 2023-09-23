@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Components
 import Header from '../partials/admin/AdminHeader'
@@ -10,11 +11,22 @@ import UpdateProduct from '../partials/admin/UpdateProduct'
 import PriceTableRow from '../partials/admin/PriceTableRow'
 
 
+// Back To Top
+import BackToTop from '../partials/BackToTop'
+import Loader from '../partials/tiny/Loader'
+
 // Admin Context
 import AdminContext from '../../context/AdminContext'
 
+
 export default function PriceList() {
   const { Host, priceList, setPriceList } = useContext(AdminContext)
+
+  // Loader
+  const [loader, setLoader] = useState(true)
+  const [fetchLoader, setFetchLoader] = useState(false)
+
+  const Route = useNavigate()
 
   // Price List
   const [tempPriceList, setTempPriceList] = useState([])
@@ -105,6 +117,8 @@ export default function PriceList() {
   
   // Fetch Price List
   const fetchPriceList = () => {
+    setFetchLoader(true)
+
     fetch(Host + 'fetch-price-list', {
       method: 'GET',
       headers: {
@@ -136,63 +150,80 @@ export default function PriceList() {
       setTempPriceList(temp)
 
       setPriceList(s)
+      setFetchLoader(false)
     }).catch(err => console.log('Error (Price List) : ', err))
   }
 
   // Use Effect
   useEffect(() => {
-    var authToken = document.cookie
+    var auth
+    try {
+      auth = JSON.parse(localStorage.getItem('auth'))
 
-    if(!authToken) {
-      window.location.href = '/login'
-    } else {
-      authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-      authToken = authToken.toString().split('=')[1]
-      setAuthToken(authToken)
-    }
-
-    if(priceList.length < 1) {
-      fetch(Host + 'fetch-price-list', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          authtoken: authToken
+      if(auth) {
+        if(auth.exp < Date.now()) {
+          localStorage.removeItem('auth')
+          return Route('/login')
         }
-      }) 
-      .then(res => res.json())
-      .then(data => {
-        var s = []
-        for(var i = data.data.length - 1; i >= 0; i--) {
-          s.push(data.data[i])
-        }
+        setAuthToken(auth.token)
+      } else {
+        localStorage.removeItem('auth')
+        return Route('/login')
+      }
 
-        sessionStorage.setItem('pricePageNumber', 1)
-        
-        // Filter will be applied for pagination
-        var pageNumber = 1
-        var skip = resultShowing * (pageNumber - 1)
-
-        var temp = []
-        var ts = s
-
-        for (let i = skip; i < pageNumber * resultShowing; i++) {
-          if (ts[i] === undefined) {
-            break;
+      if(priceList.length < 1) {
+        fetch(Host + 'fetch-price-list', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            authtoken: auth.token
           }
-          temp.push(ts[i])
-        }
-
-        setTempPriceList(temp)
-        setPriceList(s)
-      }).catch(err => console.log('Error (Price List) : ', err))
-    } else {
-      TempPriceList(priceList)
+        }) 
+        .then(res => res.json())
+        .then(data => {
+          var s = []
+          for(var i = data.data.length - 1; i >= 0; i--) {
+            s.push(data.data[i])
+          }
+  
+          sessionStorage.setItem('pricePageNumber', 1)
+          
+          // Filter will be applied for pagination
+          var pageNumber = 1
+          var skip = resultShowing * (pageNumber - 1)
+  
+          var temp = []
+          var ts = s
+  
+          for (let i = skip; i < pageNumber * resultShowing; i++) {
+            if (ts[i] === undefined) {
+              break;
+            }
+            temp.push(ts[i])
+          }
+  
+          setTempPriceList(temp)
+          setPriceList(s)
+          setLoader(false)
+        }).catch(err => console.log('Error (Price List) : ', err))
+      } else {
+        TempPriceList(priceList)
+        setLoader(false)
+      }
+    } catch (error) {
+      console.log('Error : ', error)
+      localStorage.removeItem('auth')
+      return Route('/login')
     }
-
     document.title = 'Price List | Admin'
   }, [])
   
   return (
+    loader ? 
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <Loader/>
+      </div>
+    :
       <>
         {/* Header */}
         <Header />
@@ -257,9 +288,15 @@ export default function PriceList() {
                             <td>Actions</td>
                           </tr>
                         </thead>
-                        <tbody>
-                          {tempPriceList.map(pl => <PriceTableRow key={pl.ID} values={pl} setProductId={setProductId} setShowAddProduct={setShowAddProduct} setShowUpdateProduct={setShowUpdateProduct} />)}
-                        </tbody>
+                        {fetchLoader ?
+                          <tbody className="mt-5 flex justify-center">
+                            <Loader/>
+                          </tbody>
+                          :
+                          <tbody>
+                            {tempPriceList.map(pl => <PriceTableRow key={pl.ID} values={pl} setProductId={setProductId} setShowAddProduct={setShowAddProduct} setShowUpdateProduct={setShowUpdateProduct} />)}
+                          </tbody>
+                        }
                       </table>
                     </div>
 
@@ -287,7 +324,9 @@ export default function PriceList() {
           </section>
         </main>
         {/* Main End */}
-  
+
+        {/* Back To Top */}
+        <BackToTop/>
         
         {/* Footer */}
         <Footer/>

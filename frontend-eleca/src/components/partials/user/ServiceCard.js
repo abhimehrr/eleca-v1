@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-export default function ServiceCard({ value }) {
+export default function ServiceCard({ value, Host }) {
   var {ID, itemName, cName, currentStatus, image} = value
-  image = 'http://localhost:5000/static/images/default-qr-code.png'
+  image = Host + 'static/images/' + image
 
   const [status, setStatus] = useState('')
 

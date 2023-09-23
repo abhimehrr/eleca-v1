@@ -1,15 +1,19 @@
-import React, { useContext, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useRef, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-// User Context
+// Context
 import UserContext from '../../context/UserContext'
+import AdminContext from '../../context/AdminContext'
 
 export default function AdminLogin() {
   const { Host } = useContext(UserContext)
+  const AdminContextData = useContext(AdminContext)
 
   const [showLogin, setShowLogin] = useState(true)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
 
+  const Route = useNavigate()
+  
   // Ref
   const inputRef = useRef(null)
   const passowrdRef = useRef(null)
@@ -53,14 +57,22 @@ export default function AdminLogin() {
     data = await data.json()
 
     if(data.access === 'allowed') {
-      var date = Date.now() + 1000 * 60 * 60 * 24
-      document.cookie = 'auth=' + data.authToken + ';expires=' + new Date(date).toUTCString()
-      window.location.href = '/admin/dashboard'
+      localStorage.setItem('auth', JSON.stringify({
+        token: data.authToken,
+        exp: Date.now() + 1000 * 60 * 60 * 24
+      }))
+      Route('/admin/dashboard')
     } else {
       console.log(data)
       setErr(data.msg)
     }
   }
+
+
+  useEffect(() => {
+    var auth = AdminContextData.Authorize()
+    if(auth) return Route('/admin/dashboard')
+  }, [])
 
 
   const resetPassword = () => {

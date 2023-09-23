@@ -1,10 +1,13 @@
 import React, { useContext, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Admin Context
 import AdminContext from '../../../context/AdminContext'
 
 export default function PriceTableRow({ values, setShowUpdateProduct, setShowAddProduct, setProductId }) {
   const { Host, AuthToken, Authorize } = useContext(AdminContext)
+
+  const Route = useNavigate()
 
   // Delete Product
   const deleteProduct = (id, product) => {
@@ -36,7 +39,10 @@ export default function PriceTableRow({ values, setShowUpdateProduct, setShowAdd
   }
 
   useEffect(() => {
-    Authorize()
+    var auth = Authorize()
+    if(!auth) {
+      Route('/login')
+    }
   }, [])
   
   return (

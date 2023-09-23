@@ -1,6 +1,19 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useContext, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+// Loader
+import Loader from '../tiny/LoaderSm'
+
+// Admin Context 
+import AdminContext from '../../../context/AdminContext'
 
 export default function ProcessService({ status, Host, sid }) {
+    const { Authorize, AuthToken } = useContext(AdminContext)
+
+    const Route = useNavigate()
+    
+    const [loader, setLoader] = useState(false)
+
     // Error
     const [errMsg, setErrMsg] = useState('')
 
@@ -62,10 +75,6 @@ export default function ProcessService({ status, Host, sid }) {
 
     // Submit Status Changes
     const submitStatus = (e) => {
-        var authToken = document.cookie
-        authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-        authToken = authToken.toString().split('=')[1]
-
         if(comments.current.value.length < 1) {
             comments.current.classList.add('border-red-500')
             setErrMsg('Please add some comment')
@@ -83,52 +92,64 @@ export default function ProcessService({ status, Host, sid }) {
         // Process Service
         if(comments.current.value.length > 1) {
             comments.current.classList.remove('border-red-500')
+            setLoader(true)
             setErrMsg('')
 
-            fetch(Host + "admin/service-process", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  authtoken: authToken
-                },
-                body: JSON.stringify({ 
-                    sid, status: select.current.value,
-                    comments: comments.current.value, image: imageName
-                }),
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                if(data.data) {
-                    if(imgFile) {
-                        var formData = new FormData()
-                        formData.append('image', imgFile)
-                        
-                        fetch(Host + 'admin/upload', {
-                            method: 'POST',
-                            headers: {
-                                authtoken: authToken
-                            },
-                            body: formData
-                        })
-                        .then(res => res.json())
-                        .then(d => {})
-                    }
+            try {
+                fetch(Host + "admin/service-process", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      authtoken: AuthToken
+                    },
+                    body: JSON.stringify({ 
+                        sid, status: select.current.value,
+                        comments: comments.current.value, image: imageName
+                    }),
+                })
+                .then((res) => res.json())
+                .then((data) => {
+                    if(data.data) {
+                        if(imgFile) {
+                            var formData = new FormData()
+                            formData.append('image', imgFile)
+                            
+                            fetch(Host + 'admin/upload', {
+                                method: 'POST',
+                                headers: {
+                                    authtoken: AuthToken
+                                },
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(d => {
+                                window.alert(data.msg)
+                                window.location.reload()
+                            })
+                        }  else {
+                            window.alert(data.msg)
+                            window.location.reload()
+                        }
+                    } 
+                });
+            } catch (err) {
+                console.log('Error (Process Service) : ', err)
+            }
 
-                    window.alert(data.msg)
-                    // console.log(data)
-                    window.location.reload()
-
-                } else {
-                    console.log(data)
-                    window.alert(data.msg)
-                }
-            });
-
+            
         } else {
             comments.current.classList.add('border-red-500')
             setErrMsg('Please add some comment')
         }
     }
+
+
+    useEffect(() => {
+        var auth = Authorize()
+        if(!auth) {
+            Route('/login')
+        }
+    }, [])
 
 
     return (
@@ -175,7 +196,7 @@ export default function ProcessService({ status, Host, sid }) {
                                     <option value="Delivered" className="bg-gray-800 text-gray-300">Delivered</option>
                                 </>
                             }
-                            {status === 'Rejected' || status === 'Cancelled' &&
+                            {(status === 'Rejected' || status === 'Cancelled') &&
                                 <>
                                     <option value="Delivered" className="bg-gray-800 text-gray-300">Delivered</option>
                                 </>
@@ -202,15 +223,21 @@ export default function ProcessService({ status, Host, sid }) {
                 </div>
 
                 <div className="my-4 w-full">
-                    <button onClick={submitStatus} className='flex items-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                        <i className='fa-regular fa-pen-to-square mr-2 text-sm'></i>
-                        Submit
-                    </button>
+                    {loader ?
+                        <button className='flex items-center px-4 py-2 rounded transition-all'>
+                            <Loader/>
+                        </button>
+                        :
+                        <button onClick={submitStatus} className='flex items-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                            <i className='fa-regular fa-pen-to-square mr-2 text-sm'></i>
+                            Submit
+                        </button>
+                    }
                 </div>
 
                 {imgSrc.length > 1 ?
                 <div className="my-5 bg-gray-200 p-1 rounded-lg w-full hiddens">
-                    <img className="w-full object-cover object-center rounded" title={imgTitle} src={imgSrc}/>
+                    <img className="w-full object-cover object-center rounded" title={imgTitle} alt={imgTitle} src={imgSrc}/>
                 </div> : '' 
                 }
             </div>

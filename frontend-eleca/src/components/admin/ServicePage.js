@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 // Components
 import Header from "../partials/admin/AdminHeader";
@@ -17,16 +17,27 @@ import Delivered from "../partials/process/Delivered";
 
 // User Context
 import UserContext from "../../context/UserContext";
+import AdminContext from "../../context/AdminContext";
 
 // Back To Top
 import BackToTop from '../partials/BackToTop'
+import DonwloadImage from '../partials/tiny/DonwloadImage'
+import Loader from '../partials/tiny/Loader'
+
+
 
 export default function ServicePage() {
   const { Host } = useContext(UserContext);
+  const AdminContextData = useContext(AdminContext)
+
+  const Route = useNavigate()
 
   // Services
   const [serviceDetails, setServiceDetails] = useState([]);
   const [serviceProcess, setServiceProcess] = useState([]);
+
+  // Loader
+  const [loader, setLoader] = useState(true)
   
   // Issues Ref
   const [issues, setIssues] = useState([]);
@@ -48,16 +59,12 @@ export default function ServicePage() {
     } else {
       totalAmtRef.current.classList.remove('border-red-500')
       
-      var authToken = document.cookie
-      authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-      authToken = authToken.toString().split('=')[1]
-
       // Update Total Amount
       fetch(Host + "admin/update-total-amount", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authtoken: authToken
+          authtoken: AdminContextData.AuthToken
         },
         body: JSON.stringify({
           id, totalAmt: totalAmtRef.current.value
@@ -87,16 +94,12 @@ export default function ServicePage() {
     } else {
       advanceAmtRef.current.classList.remove('border-red-500')
       
-      var authToken = document.cookie
-      authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-      authToken = authToken.toString().split('=')[1]
-
       // Update Total Amount
       fetch(Host + "admin/update-advance-amount", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authtoken: authToken
+          authtoken: AdminContextData.AuthToken
         },
         body: JSON.stringify({
           id, advanceAmt: advanceAmtRef.current.value
@@ -126,6 +129,9 @@ export default function ServicePage() {
   };
 
   useEffect(() => {
+    var auth = AdminContextData.Authorize()
+    if(!auth) return Route('/login')
+
     fetch(Host + "service-details", {
       method: "POST",
       headers: {
@@ -147,16 +153,25 @@ export default function ServicePage() {
       setAdvanceAmt(data.data[0].advanceAmt)
       setServiceDetails(data.data[0]);
       setServiceProcess(data.data[1]);
+      setLoader(false)
     });
 
     document.title = "Service Details | Eleca";
 
-    // window.scrollTo({
-    //   top: 0
-    // });
+    window.scrollTo({
+      top: 0
+    });
   }, []);
 
   return (
+    loader ? 
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <Loader/> 
+        <div className="text-lg font-medium text-gray-400">
+          Loading...
+        </div>
+      </div>
+    :
     <>
       {/* Header */}
       <Header />
@@ -175,7 +190,7 @@ export default function ServicePage() {
           </h1>
           <div className="flex items-center mb-2 max-[400px]:flex-col max-[400px]:items-start">
             <h2 className="text-gray-400 mt-1">
-              Service Request ID : {serviceDetails.ID}
+              Request Id : {serviceDetails.ID}
             </h2>
             <span className="text-teal-500 mx-3 max-[400px]:hidden">|</span>
             <p className="text-gray-400">{serviceDetails.currentStatus}</p>
@@ -193,11 +208,11 @@ export default function ServicePage() {
           <div style={{ padding: "2px" }}>
             {serviceDetails.image &&
               <div
-                className="image-box w-full rounded transition-all cursor-pointer"
-                style={{
-                  "--src": "url("+ Host +"static/images/"+ serviceDetails.image +")"
-                }}
-              ></div>
+                className="image-box relative w-full rounded transition-all cursor-pointer"
+                style={{"--src": "url("+ Host +"static/images/" + serviceDetails.image + ")"}}
+              >
+                <DonwloadImage imgUrl={Host + "static/images/" + serviceDetails.image} imgName={serviceDetails.image}/>
+              </div>
             }
           </div>
         </section>
@@ -209,18 +224,15 @@ export default function ServicePage() {
               <ul>
                 <li className="my-1">
                   <span>Name : </span>
-                  <span>{serviceDetails.cName}</span>
+                  <span className="capitalize">{serviceDetails.cName}</span>
                 </li>
                 <li className="my-1">
                   <span>Address : </span>
-                  <span>{serviceDetails.cAddress}</span>
+                  <span className="capitalize">{serviceDetails.cAddress}</span>
                 </li>
                 <li className="my-1">
                   <span>Mobile : </span>
-                  <Link
-                    to={`tel:${serviceDetails.cMobile}`}
-                    className="hover:text-teal-500 transition-all"
-                  >
+                  <Link to={`tel:${serviceDetails.cMobile}`} className="hover:text-teal-500 transition-all">
                     {serviceDetails.cMobile}
                   </Link>
                 </li>
@@ -231,11 +243,7 @@ export default function ServicePage() {
             <h2 className="text-teal-500 font-bold">Issues</h2>
             <div className="ml-4 mt-2">
               <ul className="ml-4">
-                {issues.map((i) => (
-                  <li key={i} className="my-1 list-disc">
-                    {i.trim()}
-                  </li>
-                ))}
+                {issues.map((i) => <li key={i} className="my-1 list-disc capitalize">{i.trim()}</li>)}
               </ul>
             </div>
           </div>
@@ -247,9 +255,12 @@ export default function ServicePage() {
                   <span>Estimate Amount : </span>
                   <span>{serviceDetails.estAmt}</span>
                 </li>
-                <li className="my-1 list-disc">
+                <li className="my-1 list-disc text-gray-500">
                   <span>Due Amount : </span>
-                  <span className="text-red-500 font-medium">{totalAmt - advanceAmt}</span>
+                  {totalAmt - advanceAmt < 1 ?
+                    <span className="font-medium">{advanceAmt - totalAmt}</span>
+                  : <span className="text-red-500 font-medium">{totalAmt - advanceAmt}</span>
+                  }
                 </li>
                 <li className="my-2 list-disc">
                   <span>Advance Amount : </span>

@@ -1,6 +1,12 @@
 import React from 'react'
 
+// Download Image
+import DonwloadImage from '../tiny/DonwloadImage'
+
 export default function CancelledOrRejected({ values, scaleLarge, Host }) {
+    const route = window.location.pathname.split('/')[1]
+    const imgUrl = Host +"static/images/"+ values.image
+    
     return (
         <div key={values.ID} className="flex relative pb-5">
             <div className="h-full w-10 absolute inset-0 flex items-center justify-center">
@@ -22,10 +28,12 @@ export default function CancelledOrRejected({ values, scaleLarge, Host }) {
                 </p>
                 <div className="mt-3">
                     {values.image.length > 1 &&
-                        <div onClick={scaleLarge} className="image-box w-36 rounded transition-all cursor-pointer" 
-                            style={{
-                                '--src': "url("+ Host +"static/images/"+ values.image +")"
-                            }}>
+                        <div onClick={scaleLarge} className="image-box relative w-36 rounded transition-all cursor-pointer" 
+                            style={{'--src': "url("+ imgUrl +")"}}
+                            >
+                                {route === 'admin' &&
+                                    <DonwloadImage imgUrl={imgUrl} imgName={values.image} />
+                                }
                         </div>
                     }
                 </div>

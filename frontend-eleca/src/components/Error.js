@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Error() {
     const route = window.location.pathname.split('/')[1]
     const [HomeRoute, setHomeRoute] = useState('/')
+
+    const Route = useNavigate()
 
     useEffect(() => {
         if(route === 'admin') setHomeRoute('/admin/dashboard')
@@ -11,8 +13,7 @@ export default function Error() {
     }, [])
 
     if(window.location.pathname === '/admin' || window.location.pathname === '/admin/') {
-        window.location.href = '/admin/dashboard'
-        return 
+        return Route('/admin/dashboard')
     }
 
     return (

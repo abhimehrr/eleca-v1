@@ -2,7 +2,6 @@ import React from "react";
 
 export default function Accepted({ values, adminName }) {
   const route = window.location.pathname.split('/')[1]
-  
   return (
     <div key={values.ID} className="flex relative pb-5">
       <div className="h-full w-10 absolute inset-0 flex items-center justify-center">

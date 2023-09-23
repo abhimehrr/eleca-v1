@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 // Admin Context
 import AdminContext from '../../../context/AdminContext'
 
 export default function TableRow({ values }) {
-  const { Host } = useContext(AdminContext)
+  const { Host, Authorize, AuthToken } = useContext(AdminContext)
 
+  const Route = useNavigate()
+  
   const { ID, itemName, cName, currentStatus } = values
 
   const [status, setStatus] = useState('')
   const [title, setTitle] = useState('')
-  const [authToken, setAuthToken] = useState('')
-
 
 
   // Delete Service
@@ -24,7 +24,7 @@ export default function TableRow({ values }) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            authtoken: authToken
+            authtoken: AuthToken
         },
         body: JSON.stringify({ sid: id })
       })
@@ -38,14 +38,9 @@ export default function TableRow({ values }) {
   
   
   useEffect(() => {
-    var authToken = document.cookie
-    
-    if(!authToken) {
-        window.location.href = '/login'
-    } else {
-        authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-        authToken = authToken.toString().split('=')[1]
-        setAuthToken(authToken)
+    var auth = Authorize()
+    if(!auth) {
+        Route('/login')
     }
 
     if(currentStatus === 'Processing') {

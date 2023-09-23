@@ -10,20 +10,31 @@ export const AdminContextProvider = ({ children }) => {
 
     // Authorize
     const Authorize = () => {
-        var authToken = document.cookie
-        
-        if(!authToken) {
-            window.location.href = '/login'
-        } else {
-            authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-            authToken = authToken.toString().split('=')[1]
-            setAuthToken(authToken)
+        var auth
+        try {
+            auth = JSON.parse(localStorage.getItem('auth'))
+            
+            if(auth) {
+                if(auth.exp < Date.now()) {
+                    localStorage.removeItem('auth')
+                    return false
+                }
+                
+                setAuthToken(auth.token)
+                return true
+            } else {
+                return false
+            }
+        } catch (err) {
+            localStorage.removeItem('auth')
+            return false
         }
     }
 
 
     const values = {
-        Host: 'http://localhost:5000/admin/',
+        Host: 'https://api.eleca.shre.in/admin/',
+        // Host: 'http://localhost:5000/admin/',
         services, setServices,
         AuthToken, Authorize,
         priceList, setPriceList

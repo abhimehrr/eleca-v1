@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, useRef } from "react";
+import React, { useEffect, useContext, useState } from "react";
 
 // Custom CSS
 import '../../css/table.css'
@@ -11,16 +11,26 @@ import TableRow from '../partials/admin/TableRow'
 import Pagination from '../partials/Pagination'
 import Instruction from '../partials/admin/Instruction'
 
+import { useNavigate } from 'react-router-dom'
+
 import BackToTop from '../partials/BackToTop'
+import Loader from '../partials/tiny/Loader'
 
 // Admin Context
 import AdminContext from '../../context/AdminContext'
+
 
 export default function Home() {
   const { Host, services, setServices } = useContext(AdminContext)
 
   // Status
   const [tempServices, setTempServices] = useState([])
+  
+  // Loader
+  const [loader, setLoader] = useState(true)
+  const [fetchLoader, setFetchLoader] = useState(false)
+
+  const Route = useNavigate()
   
   // Filter
   const [acceptedStatus, setAcceptedStatus] = useState('')
@@ -112,6 +122,8 @@ export default function Home() {
   const [authToken, setAuthToken] = useState('')
 
   const fetchServices = () => {
+    setFetchLoader(true)
+
     fetch(Host + 'fetch-all-services', {
       method: 'GET',
       headers: {
@@ -129,62 +141,81 @@ export default function Home() {
       setStatus(s)
       TempServices(s)
       setServices(s)
+      setFetchLoader(false)
     })
   }
 
   useEffect(() => {
-    var authToken = document.cookie
+    var auth
+    try {
+      auth = JSON.parse(localStorage.getItem('auth'))
 
-    if(!authToken) {
-      window.location.href = '/login'
-    } else {
-      authToken = authToken.split(';').filter(cookie => cookie.includes('auth'))
-      authToken = authToken.toString().split('=')[1]
-      setAuthToken(authToken)
-    }
-
-    if(services.length < 1) {
-      fetch(Host + 'fetch-all-services', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          authtoken: authToken
+      if(auth) {
+        if(auth.exp < Date.now()) {
+          localStorage.removeItem('auth')
+          return Route('/login')
         }
-      })
-      .then(res => res.json())
-      .then(data => {
-        var s = []
-        for(var i = data.data.length - 1; i >= 0; i--) {
-          s.push(data.data[i])
-        }
-        
-        sessionStorage.setItem('pageNumber', 1)
+        setAuthToken(auth.token)
+      } else {
+        localStorage.removeItem('auth')
+        return Route('/login')
+      }
 
-        var pageNumber = parseInt(sessionStorage.getItem('pageNumber'))
-        var skip = resultShowing * (pageNumber - 1)
-
-        var temp = []
-        
-        for (let i = skip; i < pageNumber * resultShowing; i++) {
-          if (s[i] === undefined) {
-            break;
+      if(services.length < 1) {
+        fetch(Host + 'fetch-all-services', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            authtoken: auth.token
           }
-          temp.push(s[i])
-        }
-        
-        setStatus(s)
-        setTempServices(temp)
-        setServices(s)
-      })
-    } else {
-      setStatus(services)
-      TempServices(services)
+        })
+        .then(res => res.json())
+        .then(data => {
+          var s = []
+          for(var i = data.data.length - 1; i >= 0; i--) {
+            s.push(data.data[i])
+          }
+          
+          sessionStorage.setItem('pageNumber', 1)
+  
+          var pageNumber = parseInt(sessionStorage.getItem('pageNumber'))
+          var skip = resultShowing * (pageNumber - 1)
+  
+          var temp = []
+          
+          for (let i = skip; i < pageNumber * resultShowing; i++) {
+            if (s[i] === undefined) {
+              break;
+            }
+            temp.push(s[i])
+          }
+          
+          setStatus(s)
+          setTempServices(temp)
+          setServices(s)
+          setLoader(false)
+        })
+      } else {
+        setStatus(services)
+        TempServices(services)
+        setLoader(false)
+      }
+      
+    } catch (error) {
+      console.log('Error : ', error)
+      localStorage.removeItem('auth')
+      return Route('/login')
     }
 
     document.title = 'Dashboard | Admin'
   }, [])
 
   return (
+    loader ? 
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <Loader/>
+      </div>
+    :
     <>
       {/* Header */}
       <Header />
@@ -270,11 +301,17 @@ export default function Home() {
                           <td>Actions</td>
                         </tr>
                       </thead>
-                      <tbody>
-                        {
-                          tempServices.map(d => <TableRow key={d.ID} values={d} />)
-                        }
-                      </tbody>
+                      {fetchLoader ?
+                        <tbody className="mt-5 flex justify-center">
+                          <Loader/>
+                        </tbody>
+                        :
+                        <tbody>
+                          {
+                            tempServices.map(d => <TableRow key={d.ID} values={d} />)
+                          }
+                        </tbody>
+                      }
                     </table>
                   </div>
 

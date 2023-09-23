@@ -440,8 +440,20 @@ const updateProduct = (req, res) => {
 
 
 
-// Get Time
-const getTime = () => new Date().toLocaleString()
+// Get Time (Production)
+const getTime = () => {
+    var d = new Date().toLocaleString()
+    return d
+}
+
+// Get Time (Live)
+// const getTime = () => {
+//     var date = new Date().toLocaleString()
+//     date = date.split(',')
+//     var newDate = date[0].split('/')
+//     newDate = newDate[1] + '/' + newDate[0] + '/' + newDate[2]
+//     return newDate + ', ' + date[1]
+// }
 
 
 module.exports = {

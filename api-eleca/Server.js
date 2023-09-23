@@ -14,7 +14,7 @@ db.connect(e => !e ? console.log('dbConnected...') : console.log('Error in dbCon
 // Cors
 const cors = require('cors')
 
-// const whiteList = ['https://shre.in', 'https://www.shre.in', 'http://shre.in', '', undefined]
+// const whiteList = ['https://eleca.shre.in', 'https://www.eleca.shre.in', 'http://eleca.shre.in', '', undefined]
 const whiteList = ['http://localhost:3000', undefined]
 
 const corsOption = {

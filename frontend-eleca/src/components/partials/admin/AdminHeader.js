@@ -1,13 +1,14 @@
 import React from "react";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function AdminHeader() {
+  const Route = useNavigate()
+
   // Logout
   const logout = () => {
     sessionStorage.clear()
     localStorage.clear()
-    document.cookie = 'auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    window.location.reload()
+    return Route('/')
   }
   
   return (

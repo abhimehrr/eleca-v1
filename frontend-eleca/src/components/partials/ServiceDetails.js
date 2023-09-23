@@ -1,8 +1,9 @@
 import React, { useEffect, useContext, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 // Components
 import BackToTop from '../partials/BackToTop'
+import Loader from '../partials/tiny/Loader'
 
 // Process
 import Accepted from '../partials/process/Accepted'
@@ -15,6 +16,7 @@ import Delivered from '../partials/process/Delivered'
 // UserContext
 import UserContext from '../../context/UserContext'
 
+
 export default function ServiceDetails() {
     const { Host } = useContext(UserContext)
     
@@ -24,6 +26,7 @@ export default function ServiceDetails() {
     const [mNum, setMNum] = useState(0)
     const [issues, setIssues] = useState([])
     const [imageShow, setImageShow] = useState('')
+    const [loader, setLoader] = useState(true)
     
     const { id } = useParams();
   
@@ -52,21 +55,30 @@ export default function ServiceDetails() {
             setImageShow(data.data[0].image)
             setServiceDetails(data.data[0])
             setServiceProcess(data.data[1])
+            setLoader(false)
         })
 
         document.title = 'Service Details | Eleca'
 
-        // window.scrollTo({
-        //     top: 0
-        // });
+        window.scrollTo({
+            top: 0
+        });
     }, [])
 
     return (
+        loader ? 
+            <div className="w-full h-screen flex flex-col items-center justify-center">
+                <Loader/> 
+                <div className="text-lg font-medium text-gray-400">
+                    Loading...
+                </div>
+            </div>
+        :
         <>
             <section className="py-5 body-font">
                 <h1 className="title-font text-2xl font-medium text-gray-300">{serviceDetails.itemName}</h1>
                 <div className='flex items-center mb-2 max-[400px]:flex-col max-[400px]:items-start'>
-                    <h2 className="text-gray-400 mt-1">Service Request ID : {serviceDetails.ID}</h2>
+                    <h2 className="text-gray-400 mt-1">Request Id : {serviceDetails.ID}</h2>
                     <span className="text-teal-500 mx-3 max-[400px]:hidden">|</span>
                     <p className="text-gray-400">{serviceDetails.currentStatus}</p>
                 </div>
@@ -89,11 +101,11 @@ export default function ServiceDetails() {
                         <ul>
                             <li className="my-1">
                                 <span>Name : </span>
-                                <span>{serviceDetails.cName}</span>
+                                <span className='capitalize'>{serviceDetails.cName}</span>
                             </li>
                             <li className="my-1">
                                 <span>Address : </span>
-                                <span>{serviceDetails.cAddress}</span>
+                                <span className='capitalize'>{serviceDetails.cAddress}</span>
                             </li>
                             <li className="my-1">
                                 <span>Mobile : </span>
@@ -106,7 +118,7 @@ export default function ServiceDetails() {
                     <h2 className="text-teal-500 font-bold">Issues</h2>
                     <div className="ml-4 mt-2">
                         <ul className="ml-4">
-                            {issues.map(i => <li key={i} className="my-1 list-disc">{i.trim()}</li>)}
+                            {issues.map(i => <li key={i} className="my-1 list-disc capitalize">{i.trim()}</li>)}
                         </ul>
                     </div>
                 </div>
@@ -128,7 +140,10 @@ export default function ServiceDetails() {
                             </li>
                             <li className="my-1 list-disc">
                                 <span>Due Amount : </span>
-                                <span className="text-red-500">{serviceDetails.totalAmt - serviceDetails.advanceAmt}</span>
+                                {serviceDetails.totalAmt - serviceDetails.advanceAmt < 1 ?
+                                    <span className="font-medium">{serviceDetails.advanceAmt - serviceDetails.totalAmt}</span>
+                                    : <span className="text-red-500 font-medium">{serviceDetails.totalAmt - serviceDetails.advanceAmt}</span>
+                                }
                             </li>
                         </ul>
                     </div>

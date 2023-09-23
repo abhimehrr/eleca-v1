@@ -5,6 +5,7 @@ import Header from "../partials/Header";
 import Footer from "../partials/Footer";
 
 import BackToTop from '../partials/BackToTop'
+import Loader from '../partials/tiny/LoaderSm'
 
 // User Context
 import UserContext from '../../context/UserContext'
@@ -14,6 +15,8 @@ import invalidImg from '../../img/invalid.jpg'
 
 export default function WarrantyCard() {
     const { Host } = useContext(UserContext)
+
+    const [loader, setLoader] = useState(false)
     
     // Error
     const [errMsg, setErrMsg] = useState('')
@@ -39,6 +42,7 @@ export default function WarrantyCard() {
         } else {
             searchRef.current.classList.remove('border-red-500')
             setErrMsg('')
+            setLoader(true)
             
             // Check Warranty Card
             fetch(Host + 'check-warranty-card', {
@@ -57,6 +61,7 @@ export default function WarrantyCard() {
                 setWarrantyCards(temp)
                 setWCard(data.data[data.data.length - 1])
                 setCurrentCardIndex(1)
+                setLoader(false)
                 
                 if(data.data.length > 1) {
                     setShowPagination(true)
@@ -129,10 +134,16 @@ export default function WarrantyCard() {
                                 <input type="number" ref={searchRef} onBlur={checkWarrantyCard} placeholder='Mobile or Serial Number' id='mobile' className="w-full px-2 py-2 bg-transparent border border-gray-200 text-gray-200 outline-none focus:border-teal-500 rounded transition-all" required/>
                             </div>
                             <div className='w-full flex items-center mt-3 gap-x-3'>
-                                <button onClick={checkWarrantyCard} className='w-full max-[500px]:w-2/5 flex items-center justify-center font-medium bg-teal-600 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                                    <i className='fa-solid fa-check-double mr-2 text-sm'></i>
-                                    Check Validity
-                                </button>
+                                {loader ?
+                                    <button className='w-full flex items-center justify-center py-2 rounded transition-all'>
+                                        <Loader/>
+                                    </button>
+                                    :
+                                    <button onClick={checkWarrantyCard} className='w-full flex items-center justify-center font-medium bg-teal-600 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                                        <i className='fa-solid fa-check-double mr-2 text-sm'></i>
+                                        Check Validity
+                                    </button>
+                                }
                             </div>
                         </div>
                         

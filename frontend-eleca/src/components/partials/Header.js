@@ -18,12 +18,6 @@ export default function Header() {
           <a className="mr-5 hover:text-white">Fourth Link</a>
         </nav> */}
         <div className="flex gap-x-3">
-          {Route.length !== 0 &&
-          <Link to='/' className="inline-flex text-sm font-medium items-center bg-gray-900 text-gray-300 border-0 py-2 px-4 focus:outline-none hover:bg-teal-500 transition-all hover:text-gray-800 rounded md:mt-0">
-            <i className="fa-solid fa-home mr-2 text-teal-600"></i>
-            Home
-          </Link>
-          }
           {Route !== 'warranty-card' &&
           <Link to='/warranty-card' className="inline-flex text-sm font-medium items-center bg-gray-900 text-gray-300 border-0 py-2 px-4 focus:outline-none hover:bg-teal-500 transition-all hover:text-gray-800 rounded md:mt-0">
             <i className="fa-solid fa-user-check mr-2 text-teal-600"></i>

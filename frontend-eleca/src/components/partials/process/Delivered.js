@@ -1,6 +1,12 @@
 import React from 'react'
 
+// Download Image
+import DonwloadImage from '../tiny/DonwloadImage'
+
 export default function Delivered({ values, scaleLarge, Host }) {
+    const route = window.location.pathname.split('/')[1]
+    const imgUrl = Host +"static/images/"+ values.image
+
     return (
         <div key={values.ID} className="flex relative">
             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-500 inline-flex items-center justify-center text-white relative z-10">
@@ -19,10 +25,13 @@ export default function Delivered({ values, scaleLarge, Host }) {
                 </p>
                 <div className="mt-3">
                     {values.image.length > 1 &&
-                        <div onClick={scaleLarge} className="image-box w-36 rounded transition-all cursor-pointer" 
+                        <div onClick={scaleLarge} className="image-box relative w-36 rounded transition-all cursor-pointer" 
                             style={{
-                                '--src': "url("+ Host +"static/images/"+ values.image +")"
+                                '--src': "url("+ imgUrl +")"
                             }}>
+                                {route === 'admin' &&
+                                    <DonwloadImage imgUrl={imgUrl} imgName={values.image} />
+                                }
                         </div>
                     }
                 </div>

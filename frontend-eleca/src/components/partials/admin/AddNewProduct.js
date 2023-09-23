@@ -1,12 +1,19 @@
 import React, { useContext, useRef, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Admin Context
 import AdminContext from '../../../context/AdminContext'
 
+// Loader
+import Loader from '../tiny/LoaderSm'
+
 export default function AddNewProduct({ setTempPriceList, tempPriceList, setShowAddProduct }) {
     const { Host, AuthToken, Authorize } = useContext(AdminContext)
 
+    const Route = useNavigate()
+
     const [errMsg, setErrMsg] = useState('')
+    const [loader, setLoader] = useState(false)
 
 
     // Ref
@@ -47,6 +54,8 @@ export default function AddNewProduct({ setTempPriceList, tempPriceList, setShow
         }
 
         if(product.length > 1 && mrp > 1 && rlp > 1) {
+            setLoader(true)
+            
             fetch(Host + 'add-product', {
                 method: 'POST',
                 headers: {
@@ -59,7 +68,6 @@ export default function AddNewProduct({ setTempPriceList, tempPriceList, setShow
             })
             .then(res => res.json())
             .then(data => {
-                console.log('Data : ', data.data)
                 var pro = { ID : data.data.insertId, productId: productIdRef.current.value, product, mrp, rlp }
                 var ntp = [pro]
                 for(var i = 0; i < tempPriceList.length - 1; i++) {
@@ -68,6 +76,8 @@ export default function AddNewProduct({ setTempPriceList, tempPriceList, setShow
                 setTempPriceList(ntp)
 
                 window.alert(data.msg)
+                setLoader(false)
+                
                 productRef.current.value = ''
                 mrpRef.current.value = ''
                 rlpRef.current.value = ''
@@ -79,7 +89,10 @@ export default function AddNewProduct({ setTempPriceList, tempPriceList, setShow
 
 
     useEffect(() => {
-        Authorize()
+        var auth = Authorize()
+        if(!auth) {
+            Route('/login')
+        }
     }, [])
     
     return (
@@ -108,10 +121,16 @@ export default function AddNewProduct({ setTempPriceList, tempPriceList, setShow
                     <i className='fa-solid fa-xmark mr-2'></i>
                     Cancel
                 </button>
+                {loader ?
+                <button className='w-full flex items-center justify-center px-4 py-2 rounded transition-all'>
+                    <Loader/>
+                </button>
+                :
                 <button onClick={addNewProduct} className='w-full flex items-center justify-center font-medium bg-teal-600 px-4 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                    <i className='fa-solid fa-check mr-2'></i>
+                    <i className='fa-solid fa-check-double mr-2'></i>
                     Submit
                 </button>
+                }
             </div>
         </div>
     )

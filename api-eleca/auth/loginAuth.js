@@ -139,9 +139,10 @@ const verifyToken = (token) => {
     }
 }
 
-// console.log(signToken('dkdk'))
+// console.log(signToken({name:'abhishek',id:'3232',isAdmin:true}))
 
-// console.log(verifyToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjp7IklEIjoxMDAwMDAwLCJOYW1lIjoiQWJoaXNoZWsiLCJFbWFpbCI6ImFiaGlAc2hyZS5pbiJ9LCJpYXQiOjE2OTQ1MjI0NDQzODUsImV4cCI6MTY5NDU2NTY0NDM4NX0.--rYmnMkHt0rAdYoEAacaa8y8ax5bfoYvwgW_8LQ5W4'))
+
+// console.log(verifyToken('eyJhbGciOiJIUz1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoIjp7Im5hbWUiOiJhYmhpc2hlayIsImlkIjoiMzIzMiIsImlzQWRtaW4iOnRydWV9LCJpYXQiOjE2OTUzODcwMzYzMTAsImV4cCI6MTY5NTM4NzA5NjMxMH0.XjmuNoKpOoywmdnfWD3SSm2obuEzuR27lL9fcWAiUcA'))
 
 
 // console.log(new Date(1694523060968).toLocaleString())

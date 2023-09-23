@@ -13,34 +13,46 @@ export default function Instruction() {
             <div className="mt-2">
             <h3 className="mb-2 text-lg font-medium text-teal-600">Status</h3>
             
-            <div className="my-1 ml-5 flex items-center">
-                <div className="bg-gray-400 w-3 h-3 mr-2 rounded-full"></div>
-                <div className="text-gray-400">Accepted</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <div className="inline-block bg-gray-400 w-3 h-3 mr-2 rounded-full"></div>
+                    Accepted
+                </div>
             </div>
-            <div className="my-1 ml-5 flex items-center">
-                <div className="bg-yellow-500 w-3 h-3 mr-2 rounded-full"></div>
-                <div className="text-gray-400">Pending</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <div className="inline-block bg-yellow-500 w-3 h-3 mr-2 rounded-full"></div>
+                    Pending
+                </div>
             </div>
-            <div className="my-1 ml-5 flex items-center">
-                <div className="bg-red-700 w-3 h-3 mr-2 rounded-full"></div>
-                <div className="text-gray-400">Recjected / Cancelled</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <div className="bg-red-700 inline-block w-3 h-3 mr-2 rounded-full"></div>
+                    Recjected / Cancelled
+                </div>
             </div>
-            <div className="my-1 ml-5 flex items-center">
-                <div className="bg-green-700 w-3 h-3 mr-2 rounded-full"></div>
-                <div className="text-gray-400">Completed / Delivered</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <div className="inline-block bg-green-700 w-3 h-3 mr-2 rounded-full"></div>
+                    Completed / Delivered
+                </div>
             </div>
             </div>
             
             <div className="mt-2">
             <h3 className="mb-2 text-lg font-medium text-teal-600">Actions</h3>
 
-            <div className="my-1 ml-5 flex items-center">
-                <i className="fa-regular fa-eye text-gray-400 mr-3"></i>
-                <div className="text-gray-400">View Details</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <i className="fa-regular fa-eye text-gray-400 mr-3"></i>
+                    View Details
+                </div>
             </div>
-            <div className="my-1 ml-5 flex items-center">
-                <i className="fa-regular fa-trash-can mr-3 text-red-600"></i>
-                <div className="text-gray-400">Delete Request</div>
+            <div className="my-1 ml-5">
+                <div className="text-gray-400">
+                    <i className="fa-regular fa-trash-can mr-3 text-red-600"></i>
+                    Delete Request
+                </div>
             </div>
             </div>
         </div>

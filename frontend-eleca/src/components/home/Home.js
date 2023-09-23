@@ -9,6 +9,7 @@ import Contact from '../partials/Contact'
 
 import BackToTop from '../partials/BackToTop'
 import ClearInput from '../partials/tiny/ClearInput'
+import Loader from '../partials/tiny/Loader'
 
 // User Context
 import UserContext from '../../context/UserContext'
@@ -19,9 +20,12 @@ export default function Home() {
   const [search, setSearch] = useState('')
   const [serviceContainer, setServiceContainer] = useState(false)
 
+  const [loader, setLoader] = useState(false)
 
   // Fetch Services
   const fetchServices = async (search) => {
+    setLoader(true)
+
     var data = await fetch(Host + 'check-service-request', {
       method: 'POST',
       headers: {
@@ -38,6 +42,7 @@ export default function Home() {
       s.push(data.data[i])
     }
 
+    setLoader(false)
     setServices(s) 
     setServiceContainer(true)
   }
@@ -70,7 +75,7 @@ export default function Home() {
               <div className="flex w-full justify-center items-end mt-3">
                 <div className="relative mr-4 text-left">
                   <label htmlFor="mobile-number" className="leading-7 text-sm text-gray-400">
-                    Mobile Number or Service ID
+                    Mobile Number or Service Id
                   </label>
                   <input onBlur={()=>fetchServices(search)} value={search} onChange={e=>setSearch(e.target.value)} type="number" id="mobile-number" className="w-full bg-gray-800 rounded border bg-opacity-40 border-gray-700 focus:ring-2 focus:ring-teal-900 focus:bg-transparent focus:border-teal-700 text-base  transition-all outline-none text-gray-100 py-1 pl-3 pr-10 leading-8 duration-200 ease-in-out"/>
                   <ClearInput resetValue={setSearch} position={['bottom-2', 'right-3']} color='text-gray-400'/>
@@ -94,12 +99,18 @@ export default function Home() {
                     </h2>
                   </div>
 
-                  <div className="flex flex-col">
-                    {/* Service Card */}
-                    {services.length < 1 ? <span className="text-red-400">Result not found!</span> :
-                      services.map(s =>  <ServiceCard key={s.ID} value={s} />)
-                    }
-                  </div>
+                  {loader ?
+                    <div className="flex items-center justify-center flex-col">
+                      <Loader/>
+                    </div>
+                    :
+                    <div className="flex flex-col">
+                      {/* Service Card */}
+                      {services.length < 1 ? <span className="text-red-400">Result not found!</span> :
+                        services.map(s =>  <ServiceCard key={s.ID} Host={Host} value={s} />)
+                      }
+                    </div>
+                  }
                 </div>
               </div> 
               }

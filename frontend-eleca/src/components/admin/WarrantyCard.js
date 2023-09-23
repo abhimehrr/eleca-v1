@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 // Components
 import Header from '../partials/admin/AdminHeader'
@@ -8,7 +8,7 @@ import Footer from '../partials/Footer'
 import RegisterWarrantyCard from '../partials/admin/RegisterWarrantyCard'
 
 import BackToTop from '../partials/BackToTop'
-
+import Loader from '../partials/tiny/LoaderSm'
 
 // Image
 import invalidImg from '../../img/invalid.jpg'
@@ -21,6 +21,10 @@ export default function WarrantyCard() {
     const { Host, Authorize, AuthToken } = useContext(AdminContext)
     const UserContextData = useContext(UserContext)
     
+    const Route = useNavigate()
+
+    // Loader State
+    const [loader, setLoader] = useState(false)
     
     // Error
     const [errMsg, setErrMsg] = useState('')
@@ -48,7 +52,7 @@ export default function WarrantyCard() {
         } else {
             searchRef.current.classList.remove('border-red-500')
             setErrMsg('')
-            
+            setLoader(true)
             // Check Warranty Card
             fetch(Host + 'check-warranty-card', {
                 method: 'POST',
@@ -69,6 +73,7 @@ export default function WarrantyCard() {
                 setWCard(data.data[data.data.length - 1])
                 setCurrentCardIndex(1)
                 setThankYou('')
+                setLoader(false)
                 
                 if(data.data.length > 1) {
                     setShowPagination(true)
@@ -116,7 +121,8 @@ export default function WarrantyCard() {
     
 
     useEffect(() => {
-        Authorize()
+        var auth = Authorize()
+        if(!auth) return Route('/login')
     }, [])
 
     return (
@@ -166,10 +172,16 @@ export default function WarrantyCard() {
                                 <i className='fa-regular fa-pen-to-square mr-3 text-sm'></i>
                                 Register Warranty
                             </button>
-                            <button onClick={checkWarrantyCard} className='w-1/2 max-[500px]:w-2/5 flex items-center justify-center font-medium bg-teal-600 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
-                                <i className='fa-solid fa-check-double mr-2 text-sm'></i>
-                                Check
-                            </button>
+                            {loader ?
+                                <button className='w-1/2 max-[500px]:w-2/5 flex items-center justify-center py-2 rounded transition-all'>
+                                    <Loader/>
+                                </button>
+                                :
+                                <button onClick={checkWarrantyCard} className='w-1/2 max-[500px]:w-2/5 flex items-center justify-center font-medium bg-teal-600 py-2 text-gray-900 hover:bg-teal-500 rounded transition-all'>
+                                    <i className='fa-solid fa-check mr-2 text-sm'></i>
+                                    Check
+                                </button>
+                            }
                         </div>
                     </div>
                     
