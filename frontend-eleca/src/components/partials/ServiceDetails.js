@@ -76,7 +76,7 @@ export default function ServiceDetails() {
         :
         <>
             <section className="py-5 body-font">
-                <h1 className="title-font text-2xl font-medium text-gray-300">{serviceDetails.itemName}</h1>
+                <h1 className="title-font text-2xl font-medium capitalize text-gray-300">{serviceDetails.itemName}</h1>
                 <div className='flex items-center mb-2 max-[400px]:flex-col max-[400px]:items-start'>
                     <h2 className="text-gray-400 mt-1">Request Id : {serviceDetails.ID}</h2>
                     <span className="text-teal-500 mx-3 max-[400px]:hidden">|</span>
@@ -118,7 +118,7 @@ export default function ServiceDetails() {
                     <h2 className="text-teal-500 font-bold">Issues</h2>
                     <div className="ml-4 mt-2">
                         <ul className="ml-4">
-                            {issues.map(i => <li key={i} className="my-1 list-disc capitalize">{i.trim()}</li>)}
+                            {issues.map(i => i.length > 0 && <li key={i} className="my-1 list-disc capitalize">{i.trim()}</li>)}
                         </ul>
                     </div>
                 </div>

@@ -7,8 +7,8 @@ export const UserContextProvider = ({ children }) => {
     const [tempServiceDetails, setTempServiceDetails] = useState([])
     
     const values = {
-        // Host: 'http://localhost:5000/',
-        Host: 'https://api.eleca.shre.in/',
+        Host: 'http://localhost:5000/',
+        // Host: 'https://api.eleca.shre.in/',
         services, setServices,
         tempServiceDetails, setTempServiceDetails
     }

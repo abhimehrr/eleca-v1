@@ -5,12 +5,19 @@ import { Link, useNavigate } from "react-router-dom";
 import UserContext from '../../context/UserContext'
 import AdminContext from '../../context/AdminContext'
 
+// Loader
+import Loader from '../partials/tiny/LoaderSm'
+
 export default function AdminLogin() {
   const { Host } = useContext(UserContext)
   const AdminContextData = useContext(AdminContext)
 
   const [showLogin, setShowLogin] = useState(true)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+
+  // Loader
+  const [loader, setLoader] = useState(false)
+  const [resetPassLoader, setResetPassLoader] = useState(false)
 
   const Route = useNavigate()
   
@@ -43,6 +50,8 @@ export default function AdminLogin() {
       setErr('')
     }
 
+    setLoader(true)
+
     var data = await fetch(Host + 'login', {
       method: 'POST',
       headers: {
@@ -64,6 +73,7 @@ export default function AdminLogin() {
       Route('/admin/dashboard')
     } else {
       console.log(data)
+      setLoader(false)
       setErr(data.msg)
     }
   }
@@ -76,6 +86,7 @@ export default function AdminLogin() {
 
 
   const resetPassword = () => {
+    setResetPassLoader(true)
     fetch(Host + 'reset-password', {
       method: 'POST',
       headers: {
@@ -91,9 +102,11 @@ export default function AdminLogin() {
     .then(data => {
       if(!data.data) {
         setErr(data.msg)
+        setResetPassLoader(false)
       }
       if(data.data) {
         window.alert(data.msg)
+        setResetPassLoader(false)
         setErr('')
         setShowLogin(true)
         setShowForgotPassword(false)
@@ -138,10 +151,16 @@ export default function AdminLogin() {
               <div className="leading-7 mb-1 -mt-2 text-sm text-red-400">
                 {err}
               </div>
+              {loader ?
+                <div className="flex items-center justify-center mt-5">
+                  <Loader/>
+                </div>
+                :
+                <button onClick={login} className="text-white bg-teal-900 border-0 py-2 mt-3 focus:outline-none hover:bg-teal-600 hover:text-gray-800 transition-all rounded text-lg">
+                  Login
+                </button>
+              }
               
-              <button onClick={login} className="text-white bg-teal-900 border-0 py-2 mt-3 focus:outline-none hover:bg-teal-600 hover:text-gray-800 transition-all rounded text-lg">
-                Login
-              </button>
             </div>
           </div>
         </section>
@@ -188,10 +207,16 @@ export default function AdminLogin() {
                   Cancel
                 </button>
 
-                <button onClick={resetPassword} className="w-1/2 text-gray-800 bg-yellow-500 border-0 py-2 mt-3 focus:outline-none hover:bg-yellow-600 transition-all rounded text-lg">
-                  <i className="fa-solid fa-check mr-2"></i>
-                  Reset
-                </button>  
+                {resetPassLoader ?
+                  <button className="w-1/2 flex items-center justify-center py-3 mt-3 transition-all">
+                    <Loader/>
+                  </button> 
+                  : 
+                  <button onClick={resetPassword} className="w-1/2 text-gray-800 bg-yellow-500 border-0 py-2 mt-3 focus:outline-none hover:bg-yellow-600 transition-all rounded text-lg">
+                    <i className="fa-solid fa-check mr-2"></i>
+                    Reset
+                  </button>  
+                }
               </div>
 
             </div>

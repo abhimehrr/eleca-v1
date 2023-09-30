@@ -33,8 +33,8 @@ export const AdminContextProvider = ({ children }) => {
 
 
     const values = {
-        Host: 'https://api.eleca.shre.in/admin/',
-        // Host: 'http://localhost:5000/admin/',
+        // Host: 'https://api.eleca.shre.in/admin/',
+        Host: 'http://localhost:5000/admin/',
         services, setServices,
         AuthToken, Authorize,
         priceList, setPriceList

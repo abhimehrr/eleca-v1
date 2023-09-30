@@ -9,6 +9,7 @@ import RegisterWarrantyCard from '../partials/admin/RegisterWarrantyCard'
 
 import BackToTop from '../partials/BackToTop'
 import Loader from '../partials/tiny/LoaderSm'
+import DonwloadImage from '../partials/tiny/DonwloadImage'
 
 // Image
 import invalidImg from '../../img/invalid.jpg'
@@ -199,7 +200,7 @@ export default function WarrantyCard() {
                                 
                                 <div className="relative image-box mb-4 w-full rounded transition-all cursor-pointer" style={{'--src':  `url(${UserContextData.Host}static/images/${wCard.image})`}}>
                                     {/* Signaute */}
-                                    <div className="absolute bottom-0 right-0">
+                                    <div className="absolute bottom-0 left-0">
                                         <div className='flex flex-col items-center justify-end text-xs py-1 px-2 bg-slate-700 opacity-60 rounded'>
                                             <span className='mb-1 text-white'>Digitally Sign</span>
                                             <span className='px-2 py-1 mb-1 font-medium bg-teal-500 text-gray-800 rounded'>
@@ -207,6 +208,9 @@ export default function WarrantyCard() {
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* Downlaod Image */}
+                                    <DonwloadImage imgUrl={`${UserContextData.Host}static/images/${wCard.image}`} imgName={wCard.image}/>
                                 </div>
 
                                 <div className="flex-grow text-left">

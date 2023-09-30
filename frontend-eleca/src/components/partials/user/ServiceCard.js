@@ -29,8 +29,8 @@ export default function ServiceCard({ value, Host }) {
         <div className="image-box mr-4 w-20 rounded transition-all cursor-pointer" style={{'--src': `url(${image})`}}></div>
 
         <div className="flex-grow text-left">
-          <p className="text-gray-300 text-sm">{cName}</p>
-          <h2 className="text-teal-500 title-font font-bold my-1">{itemName}</h2>
+          <p className="text-gray-300 capitalize text-sm">{cName}</p>
+          <h2 className="text-teal-500 title-font capitalize font-bold my-1">{itemName}</h2>
           <div className='flex items-center'>
             <div className={`w-2 h-2 ${status} mr-2 rounded-full`}></div>
             <p className="text-gray-400 text-sm">{currentStatus}</p>
